@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: release-manager-postgres
+    environment:
+      POSTGRES_DB: deployments
+      POSTGRES_USER: release-manager-user
+      POSTGRES_PASSWORD: release-manager-password
+    ports:
+      - "5432:5432"
+    volumes:
+      - release-manager-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U release-manager-user -d deployments"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  release-manager-postgres-data:
