@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import tech.challenge.release_manager.api.dto.DeployRequest
-import tech.challenge.release_manager.domain.ReleaseService
+import tech.challenge.release_manager.domain.DeploymentService
 
 @RestController
-class ReleaseController(private val releaseService: ReleaseService) {
+class ReleaseController(private val deploymentService: DeploymentService) {
 
     @PostMapping("deploy")
     fun deploy(@Valid @RequestBody deployRequest: DeployRequest): Int {
-        return 1
+        return deploymentService.deploy(deployRequest.name, deployRequest.version)
     }
 
     @GetMapping("services")
