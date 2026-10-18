@@ -1,13 +1,13 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: release-manager-postgres
+    container_name: ${COMPOSE_PROJECT_NAME}-release-manager-postgres
     environment:
       POSTGRES_DB: deployments
       POSTGRES_USER: ${DB_USER:-release-manager-db-user-dev}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-release-manager-db-password-dev}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - release-manager-postgres-data:/var/lib/postgresql/data
     healthcheck:
