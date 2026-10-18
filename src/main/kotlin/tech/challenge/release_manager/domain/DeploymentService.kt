@@ -21,6 +21,8 @@ class DeploymentService(
 
     @Transactional
     fun deploy(serviceName: String, serviceVersion: Int): Int {
+        systemVersionRepository.lockTable()
+
         val currentSystemVersion = systemVersionRepository.findCurrentVersion() ?: 0
 
         // Check if service exists
