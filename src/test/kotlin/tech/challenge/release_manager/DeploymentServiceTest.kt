@@ -4,9 +4,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.tuple
+import org.assertj.core.api.AssertionsForClassTypes
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import tech.challenge.release_manager.domain.DeploymentService
+import tech.challenge.release_manager.domain.exception.SystemVersionNotFoundException
 import tech.challenge.release_manager.persistence.ServiceDeploymentRepository
 import tech.challenge.release_manager.persistence.SystemVersionRepository
 import tech.challenge.release_manager.persistence.entity.ServiceDeploymentEntity
@@ -90,6 +93,30 @@ class DeploymentServiceTest {
         }
     }
 
+    @Test
+    fun `getServicesAt() returns services deployed until that point`() {
+        givenCurrentSystemVersion(3)
+        givenPresentDeploymentsAt(3)
+
+        var result = deploymentService.getServicesAt(3)
+
+        assertThat(result)
+            .extracting("name", "version")
+            .containsExactlyInAnyOrder(
+                tuple("Service A", 2),
+                tuple("Service B", 1)
+            )
+    }
+
+    @Test
+    fun `getServicesAt() throws when system version does not exist`() {
+        givenCurrentSystemVersion(3)
+
+        AssertionsForClassTypes.assertThatThrownBy {
+            deploymentService.getServicesAt(4)
+        }.isInstanceOf(SystemVersionNotFoundException::class.java)
+    }
+
     private fun givenCurrentSystemVersion(systemVersion: Int?) {
         every { systemVersionRepository.findCurrentVersion() } returns systemVersion
     }
@@ -103,6 +130,15 @@ class DeploymentServiceTest {
                 serviceName
             ),
             version
+        )
+    }
+
+    private fun givenPresentDeploymentsAt(systemVersion: Int) {
+        every {
+            serviceDeploymentRepository.findServicesAt(systemVersion)
+        } returns listOf(
+            ServiceDeploymentEntity(ServiceDeploymentId(3, "Service A"), 2),
+            ServiceDeploymentEntity(ServiceDeploymentId(2, "Service B"), 1)
         )
     }
 

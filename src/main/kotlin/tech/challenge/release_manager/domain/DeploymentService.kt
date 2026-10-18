@@ -2,6 +2,8 @@ package tech.challenge.release_manager.domain
 
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import tech.challenge.release_manager.api.dto.ServiceVersion
+import tech.challenge.release_manager.domain.exception.SystemVersionNotFoundException
 import tech.challenge.release_manager.persistence.ServiceDeploymentRepository
 import tech.challenge.release_manager.persistence.SystemVersionRepository
 import tech.challenge.release_manager.persistence.entity.ServiceDeploymentEntity
@@ -32,5 +34,16 @@ class DeploymentService(
         systemVersionRepository.save(SystemVersionEntity(next, Instant.now()))
         serviceDeploymentRepository.save(ServiceDeploymentEntity(ServiceDeploymentId(next, serviceName), serviceVersion))
         return next
+    }
+
+    fun getServicesAt(systemVersion: Int): List<ServiceVersion> {
+        val currentSystemVersion = systemVersionRepository.findCurrentVersion() ?: 0
+        if (currentSystemVersion < 1 || systemVersion > currentSystemVersion) {
+            throw SystemVersionNotFoundException(systemVersion)
+        }
+
+        return serviceDeploymentRepository.findServicesAt(systemVersion).map {
+            ServiceVersion(it.id.serviceName, it.version)
+        }
     }
 }

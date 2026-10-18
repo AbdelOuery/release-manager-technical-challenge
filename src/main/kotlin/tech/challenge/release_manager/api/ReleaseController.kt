@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import tech.challenge.release_manager.api.dto.DeployRequest
+import tech.challenge.release_manager.api.dto.ServiceVersion
 import tech.challenge.release_manager.domain.DeploymentService
 
 @RestController
@@ -18,7 +19,7 @@ class ReleaseController(private val deploymentService: DeploymentService) {
     }
 
     @GetMapping("services")
-    fun services(@RequestParam("systemVersion") systemVersion: Int): String {
-        return "$systemVersion"
+    fun services(@RequestParam("systemVersion") systemVersion: Int): List<ServiceVersion> {
+        return deploymentService.getServicesAt(systemVersion)
     }
 }
