@@ -4,17 +4,79 @@ services:
     container_name: release-manager-postgres
     environment:
       POSTGRES_DB: deployments
-      POSTGRES_USER: release-manager-user
-      POSTGRES_PASSWORD: release-manager-password
+      POSTGRES_USER: ${DB_USER:-release-manager-db-user-dev}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-release-manager-db-password-dev}
     ports:
       - "5432:5432"
     volumes:
       - release-manager-postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U release-manager-user -d deployments"]
+      test: [ "CMD-SHELL", "pg_isready -U release-manager-user -d deployments" ]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  release-manager:
+    image: release-manager:latest
+    build: .
+    container_name: ${COMPOSE_PROJECT_NAME}-release-manager
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/deployments
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${RELEASE_MANAGER_PORT}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  watcher:
+    image: deployment-watcher:latest
+    build: ./deployment-watcher
+    container_name: ${COMPOSE_PROJECT_NAME}-watcher
+    environment:
+      RELEASE_MANAGER_URL: http://release-manager:8080
+      PROJECT: ${COMPOSE_PROJECT_NAME}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - release-manager
+
+  service-a:
+    image: sample-service:latest
+    build: ./sample-service
+    ports:
+      - "9001:8080"
+    environment:
+      SERVICE_NAME: service-a
+      SERVICE_VERSION: ${SERVICE_A_VERSION:-1}
+    labels:
+      release.service: service-a
+      release.version: ${SERVICE_A_VERSION:-1}
+
+  service-b:
+    image: sample-service:latest
+    build: ./sample-service
+    ports:
+      - "9002:8080"
+    environment:
+      SERVICE_NAME: service-b
+      SERVICE_VERSION: ${SERVICE_B_VERSION:-1}
+    labels:
+      release.service: service-b
+      release.version: ${SERVICE_B_VERSION:-1}
+
+  service-c:
+    image: sample-service:latest
+    build: ./sample-service
+    ports:
+      - "9003:8080"
+    environment:
+      SERVICE_NAME: service-c
+      SERVICE_VERSION: ${SERVICE_C_VERSION:-1}
+    labels:
+      release.service: service-c
+      release.version: ${SERVICE_C_VERSION:-1}
 
 volumes:
   release-manager-postgres-data:
