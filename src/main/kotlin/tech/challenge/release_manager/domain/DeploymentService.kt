@@ -1,6 +1,7 @@
 package tech.challenge.release_manager.domain
 
 import jakarta.transaction.Transactional
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import tech.challenge.release_manager.api.dto.ServiceVersion
 import tech.challenge.release_manager.domain.exception.SystemVersionNotFoundException
@@ -16,6 +17,7 @@ class DeploymentService(
     val systemVersionRepository: SystemVersionRepository,
     val serviceDeploymentRepository: ServiceDeploymentRepository
 ) {
+    private val log = LoggerFactory.getLogger(DeploymentService::class.java)
 
     @Transactional
     fun deploy(serviceName: String, serviceVersion: Int): Int {
@@ -26,6 +28,7 @@ class DeploymentService(
 
         // If it does, nothing happened
         if (serviceDeployment != null && serviceDeployment.version == serviceVersion) {
+            log.info("{} version {} did not change, no system version change happened", serviceName, serviceVersion)
             return currentSystemVersion
         }
 
@@ -33,6 +36,7 @@ class DeploymentService(
         val next = currentSystemVersion + 1
         systemVersionRepository.save(SystemVersionEntity(next, Instant.now()))
         serviceDeploymentRepository.save(ServiceDeploymentEntity(ServiceDeploymentId(next, serviceName), serviceVersion))
+        log.info("{} version {} deployed, new system version {}", serviceName, serviceVersion, next)
         return next
     }
 
