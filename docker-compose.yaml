@@ -49,10 +49,10 @@ services:
       - "9001:8080"
     environment:
       SERVICE_NAME: service-a
-      SERVICE_VERSION: ${SERVICE_A_VERSION:-1}
+      SERVICE_VERSION: ${SERVICE_VERSION:-1}
     labels:
       release.service: service-a
-      release.version: ${SERVICE_A_VERSION:-1}
+      release.version: ${SERVICE_VERSION:-1}
 
   service-b:
     image: sample-service:latest
@@ -61,10 +61,10 @@ services:
       - "9002:8080"
     environment:
       SERVICE_NAME: service-b
-      SERVICE_VERSION: ${SERVICE_B_VERSION:-1}
+      SERVICE_VERSION: ${SERVICE_VERSION:-1}
     labels:
       release.service: service-b
-      release.version: ${SERVICE_B_VERSION:-1}
+      release.version: ${SERVICE_VERSION:-1}
 
   service-c:
     image: sample-service:latest
@@ -73,10 +73,10 @@ services:
       - "9003:8080"
     environment:
       SERVICE_NAME: service-c
-      SERVICE_VERSION: ${SERVICE_C_VERSION:-1}
+      SERVICE_VERSION: ${SERVICE_VERSION:-1}
     labels:
       release.service: service-c
-      release.version: ${SERVICE_C_VERSION:-1}
+      release.version: ${SERVICE_VERSION:-1}
 
 volumes:
   release-manager-postgres-data:
