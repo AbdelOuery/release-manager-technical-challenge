@@ -32,10 +32,10 @@ Once everything is running, we can start deploying a couple of sample services (
 Let's replay the same scenario from the assignment
 
 ````
-SERVICE_A_VERSION=1 docker compose --env-file env/production-1.env up -d service-a
-SERVICE_B_VERSION=1 docker compose --env-file env/production-1.env up -d service-b
-SERVICE_A_VERSION=2 docker compose --env-file env/production-1.env up -d service-a
-SERVICE_B_VERSION=1 docker compose --env-file env/production-1.env up -d service-b
+SERVICE_VERSION=1 docker compose --env-file env/production-1.env up -d service-a
+SERVICE_VERSION=1 docker compose --env-file env/production-1.env up -d service-b
+SERVICE_VERSION=2 docker compose --env-file env/production-1.env up -d service-a
+SERVICE_VERSION=1 docker compose --env-file env/production-1.env up -d service-b
 ````
 
 This should cause our deployment watcher python app to call `/deploy` for each service, thus we can verify whether
